@@ -40,21 +40,16 @@ public class OrgChart {
      * @return true if the {@code Employee} was added successfully, false otherwise
      */
     public boolean addEmployee(Employee employee) {
-        if (employee == null || orgChart.contains(employee)) {
+        if (employee == null || hasEmployee(employee)) {
             return false;
         }
 
         if (employee.hasManager() || employee instanceof Manager) {
-            Employee manager = employee.getManager();
-            while (manager != null && !orgChart.contains(manager)) {
-                orgChart.add(manager);
-                manager = manager.getManager();
-            }
-            orgChart.add(employee);
-            return true;
-        } else {
-            return false;
+            orgChart.addAll(employee.getChainOfCommand());
+            return orgChart.add(employee);
         }
+
+        return false;
     }
 
     /**
@@ -149,11 +144,8 @@ public class OrgChart {
     public Map<Manager, Set<Employee>> getFullHierarchy() {
         Map<Manager, Set<Employee>> hierarchy = new HashMap<>();
 
-        Set<Manager> allManagers = getAllManagers();
-
-        for (Manager manager : allManagers) {
-            Set<Employee> subordinates = getDirectSubordinates(manager);
-            hierarchy.put(manager, subordinates);
+        for (Manager manager : getAllManagers()) {
+            hierarchy.put(manager, getDirectSubordinates(manager));
         }
         return hierarchy;
     }
